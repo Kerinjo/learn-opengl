@@ -20,7 +20,7 @@ const char *fragmentShaderSource =
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-    "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "FragColor = vec4(0.05f, 0.9f, 0.9f, 1.0f);\n"
 "}\0";
 
 
@@ -59,10 +59,16 @@ int main()
 
     // Coordinates of vertices
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+        -0.6f, -0.8f, 0.0f,
+        -0.6f,  0.4f, 0.0f,
+         0.3f, -1.0f, 0.0f
     };
+
+    // VAO creation
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    // Binding
+    glBindVertexArray(VAO);
 
     // VBO creation
     unsigned int VBO;
@@ -71,6 +77,10 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     // Sending vertex data into buffer's memory
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Setting up vertex attributes pointers
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     // Vertex shader object creation
     unsigned int vertexShader;
@@ -125,8 +135,6 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
 
     // Render loop
     while(!glfwWindowShouldClose(window))
@@ -137,6 +145,10 @@ int main()
         // rendering commands here
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // check and call events and swap buffers
         glfwPollEvents();

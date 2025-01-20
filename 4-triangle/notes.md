@@ -45,7 +45,7 @@ glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 ## Vertex shader
 
-Vertex shader is responsible for color, position, texture of individual parts (vertices).
+Vertex shader is responsible for color, position, texture of individual parts vertices).
 The vertex shader is one of the shaders programmable by people like us. Modern OpenGL requires at least a vertex shader and a fragment shader to do rendering. 
 The first thing to do is to write the vertex shader in GLSL and compile it.
 ```
@@ -180,3 +180,37 @@ The function `glVertexAttribPointer` has quite a few parameters, so let's unders
 - Fifth parameter is known as the `stride` and tells us the space between consecutive vertex attribues. We could've also specified the stride as 0 to let OpenGL determine the stride. This only works if the values are tightly packed.
 - The last parameter is of type void* and thus requires this mystic cast. This is the offset of where the position data begins in the buffer. We'll explore this further on.
 
+## Vertex Array Object
+
+A vertex array object (VAO) can be bound just like a VBO, and any subsequent attribute calls from that point on will be stored inside the VAO. Core OpenGL requires, that we use a VAO so it knows what to do with our vertex inputs. If we fail to bind a VAO, OpenGL will most likely refuse to draw anything.
+
+VAO stores the following:
+- Calls to `glEnableVertexAttribArray` or `glDisableVertexAttribArray`.
+- Vertex attribute configurations via `glVertexAttribPointer`.
+- Vertex buffer objects associated with the vertex attributes by calls to `glVertexAttribPointer`.
+
+The process to generate a VAO looks similar to that of a VBO:
+
+```
+unsigned int VAO;
+glGenVertexArrays(1, &VAO);
+```
+
+To use a VAO you have to bind it using `glBindVertexArray`, bind the corresponding VBOs and attribute pointers, "unbind the VAO for later use"(?). As soon as we want to draw an object, we simply bind the VAO with the preferred settings before drawing the object and that's it.
+
+```
+glBindVertexArray(VAO);
+
+glBindBuffer(GL_ARRAY_BUFFER, VBO);
+glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+glEnableVertexAttribArray(0);
+
+[...]
+
+// in render loop
+glUseProgram(shaderProgam);
+glBindVertexArray(VAO);
+drawTriangle();
+```
